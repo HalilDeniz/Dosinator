@@ -20,7 +20,7 @@ DoSinator is a powerful Denial of Service (DoS) testing tool developed in Python
 1. Clone the repository:
 
    ```shell
-   git clone https://github.com/your-username/DoSinator.git
+   git clone https://github.com/HalilDeniz/DoSinator.git
    ```
 
 2. Navigate to the project directory:
