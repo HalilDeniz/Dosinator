@@ -47,7 +47,7 @@ python3 dos.py --target <target_ip> --port <target_port> --num_packets <num_pack
 - `packet_size`: Size of each packet in bytes (default: 64).
 - `attack_rate`: Attack rate in packets/second (default: 10).
 - `duration`: Duration of the attack in seconds.
-- `attack_mode`: Attack mode: syn, udp, icmp (default: syn).
+- `attack_mode`: Attack mode: syn, udp, icmp, http (default: syn).
 - `spoof_ip`: Spoof IP address (default: None).
 
 Please use this tool responsibly and ensure you have the necessary permissions before conducting any tests.
@@ -68,5 +68,11 @@ If you have any questions, comments, or suggestions about Dosinator, please feel
 
 
 ## License
-
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
+
+## 💰 You can help me by Donating
+  Thank you for considering supporting me! Your support enables me to dedicate more time and effort to creating useful tools like DNSWatch and developing new projects. By contributing, you're not only helping me improve existing tools but also inspiring new ideas and innovations. Your support plays a vital role in the growth of this project and future endeavors. Together, let's continue building and learning. Thank you!"<br>
+  [![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/halildeniz) 
+  [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://patreon.com/denizhalil) 
+
+  
