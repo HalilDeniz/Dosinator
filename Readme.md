@@ -38,7 +38,28 @@ DoSinator is a versatile Denial of Service (DoS) testing tool developed in Pytho
 ## Usage
 
 ```shell
-python3 dos.py --target <target_ip> --port <target_port> --num_packets <num_packets> --packet_size <packet_size> --attack_rate <attack_rate> --duration <duration> --attack_mode <attack_mode> --spoof_ip <spoof_ip>
+usage: dos_tool.py [-h] -t TARGET -p PORT [-np NUM_PACKETS] [-ps PACKET_SIZE]
+                   [-ar ATTACK_RATE] [-d DURATION] [-am {syn,udp,icmp,http,dns}]
+                   [-sp SPOOF_IP] [--data DATA]
+
+optional arguments:
+  -h, --help            Show this help message and exit.
+  -t TARGET, --target TARGET
+                        Target IP address.
+  -p PORT, --port PORT  Target port number.
+  -np NUM_PACKETS, --num_packets NUM_PACKETS
+                        Number of packets to send (default: 500).
+  -ps PACKET_SIZE, --packet_size PACKET_SIZE
+                        Packet size in bytes (default: 64).
+  -ar ATTACK_RATE, --attack_rate ATTACK_RATE
+                        Attack rate in packets per second (default: 10).
+  -d DURATION, --duration DURATION
+                        Duration of the attack in seconds.
+  -am {syn,udp,icmp,http,dns}, --attack-mode {syn,udp,icmp,http,dns}
+                        Attack mode (default: syn).
+  -sp SPOOF_IP, --spoof-ip SPOOF_IP
+                        Spoof IP address.
+  --data DATA           Custom data string to send.
 ```
 
 - `target_ip`: IP address of the target system.
@@ -49,6 +70,7 @@ python3 dos.py --target <target_ip> --port <target_port> --num_packets <num_pack
 - `duration`: Duration of the attack in seconds.
 - `attack_mode`: Attack mode: syn, udp, icmp, http (default: syn).
 - `spoof_ip`: Spoof IP address (default: None).
+- `data`: Custom data string to send.
 
 Please use this tool responsibly and ensure you have the necessary permissions before conducting any tests.
 
