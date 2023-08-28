@@ -72,7 +72,14 @@ optional arguments:
 - `spoof_ip`: Spoof IP address (default: None).
 - `data`: Custom data string to send.
 
-Please use this tool responsibly and ensure you have the necessary permissions before conducting any tests.
+## Disclaimer
+
+The usage of the Dosinator tool for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state, and federal laws. The author assumes no liability and is not responsible for any misuse or damage caused by this program.
+
+By using Dosinator, you agree to use this tool for educational and ethical purposes only. The author is not responsible for any actions or consequences resulting from misuse of this tool.
+
+Please ensure that you have the necessary permissions to conduct any form of testing on a target network. Use this tool at your own risk.
+
 
 ## Contributing
 
