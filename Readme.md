@@ -1,6 +1,8 @@
 # DoSinator
-
 DoSinator is a versatile Denial of Service (DoS) testing tool developed in Python. It empowers security professionals and researchers to simulate various types of DoS attacks, allowing them to assess the resilience of networks, systems, and applications against potential cyber threats.
+<img src="source/dosinator.png">
+
+
 
 ## Features
 
