@@ -40,7 +40,7 @@ DoSinator is a versatile Denial of Service (DoS) testing tool developed in Pytho
 ## Usage
 
 ```shell
-usage: dos_tool.py [-h] -t TARGET -p PORT [-np NUM_PACKETS] [-ps PACKET_SIZE]
+usage: dosinator.py [-h] -t TARGET -p PORT [-np NUM_PACKETS] [-ps PACKET_SIZE]
                    [-ar ATTACK_RATE] [-d DURATION] [-am {syn,udp,icmp,http,dns}]
                    [-sp SPOOF_IP] [--data DATA]
 
