@@ -2,9 +2,10 @@
 
 DoSinator is a powerful Denial of Service (DoS) testing tool developed with Python. Designed for security professionals and researchers, this tool allows them to simulate various DoS attacks. In this way, it provides a realistic environment for assessing the resilience of networks, systems and applications against potential cyber threats.
 <img src="source/dosinator2.png">
+
 ## Features
 
-- **Multiple Attack Modes**: DoSinator supports SYN Flood, UDP Flood, ICMP Flood,Os Fingerprint, Slowloris, and Smurf attack modes, allowing you to simulate various types of DoS attacks.
+- **Multiple Attack Modes**: DoSinator supports SYN Flood, UDP Flood, ICMP Flood,Os Fingerprint, Slowloris,Rudy,Sctp and Smurf attack modes, allowing you to simulate various types of DoS attacks.
 - **Customizable Parameters**: Adjust the packet size, attack rate, and duration to fine-tune the intensity and duration of the attack.
 - **IP Spoofing**: Enable IP spoofing to mask the source IP address and enhance anonymity during the attack.
 - **Multithreaded Packet Sending**: Utilize multiple threads for simultaneous packet sending, maximizing the attack speed and efficiency.
@@ -40,7 +41,7 @@ DoSinator is a powerful Denial of Service (DoS) testing tool developed with Pyth
 ## Usage
 
 ```shell
-python3 dosinator.py --help                                                                 
+$ python3 dosinator.py --help            
     ____             ____            __                
    / __ \____  _____/  _/___  ____ _/ /_____  _____    
   / / / / __ \/ ___// // __ \/ __ `/ __/ __ \/ ___/    
@@ -48,8 +49,7 @@ python3 dosinator.py --help
 /_____/\____/____/___/_/ /_/\__,_/\__/\____/_/  (_|_|_)
                                                        
 
-usage: dosinator.py [-h] -t TARGET -p PORT [-np NUM_PACKETS] [-ps PACKET_SIZE] [-ar ATTACK_RATE] [-d  DURATION]
-                    [-am {syn,udp,icmp,http,dns,os_fingerprint,slowloris,smurf}] [-sp SPOOF_IP] [--data DATA] [--file FILE]
+usage: dosinator.py [-h] -t TARGET -p PORT [-np NUM_PACKETS] [-ps PACKET_SIZE] [-ar ATTACK_RATE] [-d  DURATION] [-am {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy}] [-sp SPOOF_IP] [--data DATA] [--file FILE]
                     [--pcap PCAP]
 
 options:
@@ -65,13 +65,14 @@ options:
                         Attack rate in packets/second (default: 10)
   -d  DURATION, --duration DURATION
                         Duration of the attack in seconds
-  -am {syn,udp,icmp,http,dns,os_fingerprint,slowloris,smurf}, --attack-mode {syn,udp,icmp,http,dns,os_fingerprint,slowloris,smurf}
+  -am {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy}, --attack-mode {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy}
                         Attack mode (default: syn)
   -sp SPOOF_IP, --spoof-ip SPOOF_IP
                         Spoof IP address
   --data DATA           Custom data string to send
   --file FILE           File path to read data from
   --pcap PCAP           PCAP file path to save outgoing packets
+
 ```
 
 - `target_ip`: IP address of the target system.
@@ -131,8 +132,7 @@ Contributions are welcome! If you find any issues or have suggestions for improv
 ## Contact
 
 If you have any questions, comments, or suggestions about Dosinator, please feel free to contact me:
-- Linktr [halildeniz](https://linktr.ee/halildeniz)
-- DenizHalil [DenizHalil](https://denizhalil.com)
+
 - LinkedIn: [Halil Ibrahim Deniz](https://www.linkedin.com/in/halil-ibrahim-deniz/)
 - TryHackMe: [Halilovic](https://tryhackme.com/p/halilovic)
 - Instagram: [deniz.halil333](https://www.instagram.com/deniz.halil333/)
@@ -144,7 +144,7 @@ If you have any questions, comments, or suggestions about Dosinator, please feel
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
 ## 💰 You can help me by Donating
-  Thank you for considering supporting me! Your support enables me to dedicate more time and effort to creating useful tools like Dosinator and developing new projects. By contributing, you're not only helping me improve existing tools but also inspiring new ideas and innovations. Your support plays a vital role in the growth of this project and future endeavors. Together, let's continue building and learning. Thank you!"<br>
+  Thank you for considering supporting me! Your support enables me to dedicate more time and effort to creating useful tools like DNSWatch and developing new projects. By contributing, you're not only helping me improve existing tools but also inspiring new ideas and innovations. Your support plays a vital role in the growth of this project and future endeavors. Together, let's continue building and learning. Thank you!"<br>
   [![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/halildeniz) 
   [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://patreon.com/denizhalil) 
 
