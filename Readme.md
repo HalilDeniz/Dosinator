@@ -1,16 +1,17 @@
 # DoSinator
 
-DoSinator is a powerful Denial of Service (DoS) testing tool developed with Python. Designed for security professionals and researchers, this tool allows them to simulate various DoS attacks. In this way, it provides a realistic environment for assessing the resilience of networks, systems and applications against potential cyber threats.
+DoSinator is a powerful Denial of Service (DoS) testing tool developed in Python. Designed for security professionals and researchers, this tool allows them to simulate various DoS attacks, providing a realistic environment for assessing the resilience of networks, systems, and applications against potential cyber threats.
 <img src="source/dosinator2.png">
 
 ## Features
 
-- **Multiple Attack Modes**: DoSinator supports SYN Flood, UDP Flood, ICMP Flood,Os Fingerprint, Slowloris,Rudy,Sctp and Smurf attack modes, allowing you to simulate various types of DoS attacks.
-- **Customizable Parameters**: Adjust the packet size, attack rate, and duration to fine-tune the intensity and duration of the attack.
+- **Multiple Attack Modes**: DoSinator supports various attack modes, including SYN Flood, UDP Flood, ICMP Flood, OS Fingerprinting, Slowloris, Rudy, SCTP, Smurf, and ARP attack modes, allowing you to simulate different types of DoS attacks.
+- **Customizable Parameters**: Adjust packet size, attack rate, and duration to fine-tune the intensity and duration of the attack.
 - **IP Spoofing**: Enable IP spoofing to mask the source IP address and enhance anonymity during the attack.
-- **Multithreaded Packet Sending**: Utilize multiple threads for simultaneous packet sending, maximizing the attack speed and efficiency.
+- **Multithreaded Packet Sending**: Utilize multiple threads for simultaneous packet sending, maximizing attack speed and efficiency.
 - **Data from File**: Load custom data from a file to be sent in the attack packets.
 - **PCAP Output**: Save the outgoing attack packets to a PCAP file for further analysis.
+- **ARP Flooding**: Perform ARP flooding attacks to disrupt network communication.
 
 ## Requirements
 
@@ -41,7 +42,7 @@ DoSinator is a powerful Denial of Service (DoS) testing tool developed with Pyth
 ## Usage
 
 ```shell
-$ python3 dosinator.py --help            
+$ python3 dosinator.py --help                                                                   
     ____             ____            __                
    / __ \____  _____/  _/___  ____ _/ /_____  _____    
   / / / / __ \/ ___// // __ \/ __ `/ __/ __ \/ ___/    
@@ -49,14 +50,15 @@ $ python3 dosinator.py --help
 /_____/\____/____/___/_/ /_/\__,_/\__/\____/_/  (_|_|_)
                                                        
 
-usage: dosinator.py [-h] -t TARGET -p PORT [-np NUM_PACKETS] [-ps PACKET_SIZE] [-ar ATTACK_RATE] [-d  DURATION] [-am {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy}] [-sp SPOOF_IP] [--data DATA] [--file FILE]
-                    [--pcap PCAP]
+usage: dosinator.py [-h] -t TARGET [-p PORT] [-np NUM_PACKETS] [-ps PACKET_SIZE] [-ar ATTACK_RATE] [-d  DURATION]
+                    [--attack-mode {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy,arp}]
+                    [-sp SPOOF_IP] [--data DATA] [--file FILE] [--pcap PCAP] [--arp-mode {request,reply}]
 
 options:
   -h, --help            show this help message and exit
   -t TARGET, --target TARGET
                         Target IP address
-  -p PORT, --port PORT  Target port number
+  -p PORT, --port PORT  Target port number (required for non-ARP attacks)
   -np NUM_PACKETS, --num_packets NUM_PACKETS
                         Number of packets to send (default: 500)
   -ps PACKET_SIZE, --packet_size PACKET_SIZE
@@ -65,14 +67,15 @@ options:
                         Attack rate in packets/second (default: 10)
   -d  DURATION, --duration DURATION
                         Duration of the attack in seconds
-  -am {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy}, --attack-mode {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy}
+  --attack-mode {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy,arp}
                         Attack mode (default: syn)
   -sp SPOOF_IP, --spoof-ip SPOOF_IP
                         Spoof IP address
   --data DATA           Custom data string to send
   --file FILE           File path to read data from
   --pcap PCAP           PCAP file path to save outgoing packets
-
+  --arp-mode {request,reply}
+                        ARP mode (default: request)
 ```
 
 - `target_ip`: IP address of the target system.
@@ -86,6 +89,7 @@ options:
 - `data`: Custom data string to send.
 - `file`: File path to read data from.
 - `pcap`: PCAP file path to save outgoing packets
+- `--arp-mode`: Optional flag to specify ARP mode. Use `request` for ARP request packets (default) or `reply` for ARP reply packets.
 
 
 ## Usage Examples
@@ -121,7 +125,15 @@ python dosinator.py -t 192.168.1.5 -p 0 -ar 100 -d 240 -am smurf
 ```shell
 python dosinator.py -t 192.168.1.6 -p 53 -ar 300 -d 150 -am dns --file dns_query.txt
 ```
+#### ARP Request Flooding Attack
+```shell
+python3 dosinator.py -t 192.168.1.7 -am arp --arp-mode request
+```
 
+#### ARP Reply Flooding Attack
+```shell
+python3 dosinator.py -t 192.168.1.8 -am arp --arp-mode reply
+```
 
 Please use this tool responsibly and ensure you have the necessary permissions before conducting any tests.
 
@@ -144,8 +156,8 @@ If you have any questions, comments, or suggestions about Dosinator, please feel
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for more details.
 
 ## 💰 You can help me by Donating
-  Thank you for considering supporting me! Your support enables me to dedicate more time and effort to creating useful tools like DNSWatch and developing new projects. By contributing, you're not only helping me improve existing tools but also inspiring new ideas and innovations. Your support plays a vital role in the growth of this project and future endeavors. Together, let's continue building and learning. Thank you!"<br>
-  [![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/halildeniz) 
-  [![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://patreon.com/denizhalil) 
+Thank you for considering supporting me! Your support enables me to dedicate more time and effort to creating useful tools like DNSWatch and developing new projects. By contributing, you're not only helping me improve existing tools but also inspiring new ideas and innovations. Your support plays a vital role in the growth of this project and future endeavors. Together, let's continue building and learning. Thank you!"<br>
+[![BuyMeACoffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/halildeniz) 
+[![Patreon](https://img.shields.io/badge/Patreon-F96854?style=for-the-badge&logo=patreon&logoColor=white)](https://patreon.com/denizhalil) 
 
   
