@@ -38,6 +38,13 @@ DoSinator is a powerful Denial of Service (DoS) testing tool developed in Python
    ```shell
    pip install -r requirements.txt
    ```
+---
+
+## 📖 BONUS: My Book
+
+I'm excited to share my book, **"Mastering Scapy: A Comprehensive Guide to Network Analysis."** You can explore it [here](https://denizhalil.com/2023/11/12/scapy-guide-to-network-analysis-book/).
+
+---
 
 ## Usage
 
