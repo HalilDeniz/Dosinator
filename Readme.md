@@ -49,7 +49,7 @@ I'm excited to share my book, **"Mastering Scapy: A Comprehensive Guide to Netwo
 ## Usage
 
 ```shell
-$ python3 dosinator.py --help                                                                   
+$ python3 dosinator.py --help
     ____             ____            __                
    / __ \____  _____/  _/___  ____ _/ /_____  _____    
   / / / / __ \/ ___// // __ \/ __ `/ __/ __ \/ ___/    
@@ -57,9 +57,10 @@ $ python3 dosinator.py --help
 /_____/\____/____/___/_/ /_/\__,_/\__/\____/_/  (_|_|_)
                                                        
 
-usage: dosinator.py [-h] -t TARGET [-p PORT] [-np NUM_PACKETS] [-ps PACKET_SIZE] [-ar ATTACK_RATE] [-d  DURATION]
-                    [--attack-mode {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy,arp}]
+usage: dosinator.py [-h] -t TARGET [-p PORT] [-np NUM_PACKETS] [-ps PACKET_SIZE] [-ar ATTACK_RATE] [-d DURATION]
+                    [--attack-mode {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy,arp,port_scan,traceroute}]
                     [-sp SPOOF_IP] [--data DATA] [--file FILE] [--pcap PCAP] [--arp-mode {request,reply}]
+                    [--ttl TTL] [--port-range PORT_RANGE] [--id ID] [--win WIN] [--max-hops MAX_HOPS]
 
 options:
   -h, --help            show this help message and exit
@@ -72,9 +73,9 @@ options:
                         Packet size in bytes (default: 64)
   -ar ATTACK_RATE, --attack_rate ATTACK_RATE
                         Attack rate in packets/second (default: 10)
-  -d  DURATION, --duration DURATION
+  -d DURATION, --duration DURATION
                         Duration of the attack in seconds
-  --attack-mode {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy,arp}
+  --attack-mode {syn,sctp,udp,icmp,http,dns,os_fingerprint,slowloris,smurf,rudy,arp,port_scan,traceroute}
                         Attack mode (default: syn)
   -sp SPOOF_IP, --spoof-ip SPOOF_IP
                         Spoof IP address
@@ -83,6 +84,12 @@ options:
   --pcap PCAP           PCAP file path to save outgoing packets
   --arp-mode {request,reply}
                         ARP mode (default: request)
+  --ttl TTL             TTL value for the outgoing packets (default: 64)
+  --port-range PORT_RANGE
+                        Port range for port scan (default: 1-1000)
+  --id ID               IP identification field (default: None)
+  --win WIN             TCP window size (default: None)
+  --max-hops MAX_HOPS   Max hops for traceroute (default: 30)
 ```
 
 - `target_ip`: IP address of the target system.
