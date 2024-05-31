@@ -3,6 +3,11 @@
 DoSinator is a powerful Denial of Service (DoS) testing tool developed in Python. Designed for security professionals and researchers, this tool allows them to simulate various DoS attacks, providing a realistic environment for assessing the resilience of networks, systems, and applications against potential cyber threats.
 <img src="source/dosinator2.png">
 
+<h4 align="center">
+<br>
+   <a href="https://buymeacoffee.com/halildeniz" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+</h4>
+
 ## Features
 
 - **Multiple Attack Modes**: DoSinator supports various attack modes, including SYN Flood, UDP Flood, ICMP Flood, OS Fingerprinting, Slowloris, Rudy, SCTP, Smurf, and ARP attack modes, allowing you to simulate different types of DoS attacks.
