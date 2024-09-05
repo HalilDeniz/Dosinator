@@ -107,7 +107,7 @@ options:
 
 ## Usage Examples
 
-Here are some usage examples of DoSinator: [You can explore it here](https://denizhalil.com/2023/11/27/dosinator-denial-of-service-tool/):
+Here are some usage examples of DoSinator: [You can explore it here](https://denizhalil.com/2023/11/29/networksherlock-port-scanning/)
 
 
 Please use this tool responsibly and ensure you have the necessary permissions before conducting any tests.
